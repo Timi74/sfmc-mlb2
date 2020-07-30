@@ -25,4 +25,4 @@ app.use('/editor', requireRoot('controllers/editor'));
 
 app.listen(config.serverPort, function() {
 	console.log('Application started: ' + (new Date()));
-})
+});
