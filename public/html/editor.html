@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            *, input, select { font-family: Helvetica; font-size: 12px; line-height: 20px; color: #444444; }
+            input, textarea { border: solid 1px #DEDEDE; padding: 2px 5px; width: 100%; box-sizing: border-box; border-radius: 4px; resize: vertical; }
+
+            select { height: 30px; border: solid 1px #AAAAAA; box-sizing: border-box; width: 100%; max-width: 200px; }
+            select:disabled { color: #BBBBBB; }
+            th { padding-right: 10px; font-weight: normal; }
+            body {padding: 0px; margin: 0px; position: relative; }
+            p { margin: 0px; margin-bottom: 10px; }
+            
+            .label { color: #888888; }
+            .block { padding: 10px; }
+            .controls { background: #DEDEDE; padding: 10px; }
+            .controls input { border-color: #AAAAAA; }
+
+            .field.required { border-color: #FFC3C3; box-shadow: 0 1px 1px rgba(255, 0, 0, .2); }
+            .field-group { margin-bottom: 10px; }
+            .field.required-ready { border-color: #739a75 !important; }
+
+            .popup { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: none; }
+            .popup-overlay { position: absolute; z-index: 100; top: 0; left: 0; right: 0; bottom: 0; background: #FFFFFF; opacity: 1; }
+            .popup-content { position: absolute; width: 100%; overflow-y: scroll; padding-top: 20px; top: 0; left: 0; bottom: 0; z-index: 200; text-align: center; }
+            .popup-content .popup-message { font-size: 18px; color: #AAAAAA; margin-top: 40%; text-align: center; }
+            .popup-close {position: absolute; right: 25px; top: 0; cursor: pointer; font-size: 20px; color: #888888; z-index: 300;}
+            .assets-mode {position: absolute; left: 10px; top: 2px; cursor: pointer; font-size: 12px; color: #888888; z-index: 300;}
+
+            .assets td { text-align: left; vertical-align: top; padding: 5px 10px; border-bottom: solid 1px #DCDCDC; }
+            .assets th { text-align: left; vertical-align: top; padding: 5px 10px; }
+            .assets img { border: solid 1px #888888; cursor: pointer; display: block; }
+            .assets tr:hover td { background: #F0F0F0; }
+
+            .error { padding: 10px; margin: 20px; text-align: left; border: solid 1px #f5c6cb; background: #f8d7da; color: #721c24; overflow-x: hidden; }
+            .error h1 { font-weight: bold; font-size: 14px; }
+
+
+            button.save {
+                color: #fff;
+                background-color: #66afe9;
+                background: linear-gradient(#66afe9,#4e8abe);
+                background-repeat: no-repeat;
+                box-shadow: 0 2px 2px rgba(0,0,0,.15);
+                border-radius: 4px;
+                width: 100%;
+                box-sizing: border-box;
+                font-size: 12px;
+                line-height: 30px;                
+            }
+            
+            button.small {
+                color: #4e8abe;
+                background-color: #66afe9;
+                background: linear-gradient(#fff,#d9eaf5);
+                background-repeat: no-repeat;
+                box-shadow: 0 2px 2px rgba(0,0,0,.15);
+                border-radius: 4px;
+                box-sizing: border-box;
+                font-size: 10px;
+                line-height: 12px;
+                margin: 4px 0px;
+                margin-left: 5px;
+            }
+
+        </style>
+        
+        <script src="/public/js/jquery-3.3.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.js"></script>
+        <script src="/public/js/blocksdk.js"></script>
+
+        <script>
+            var sdk = new window.sfdc.BlockSDK();
+
+            var controller = {
+                endpoint:        '/editor/api/',
+                assetsMode:      'search',
+                assetsFolderPath: [],
+                currentBlock:    null,
+                updateTimer:     null,
+                locales:         [],
+                blocks:          [],
+
+                executeCall: function(action, payload){
+                    var apiUrl = this.endpoint + action;
+                    var data = {
+                        "payload": JSON.stringify(payload)
+                    };
+                    
+                    return new Promise((resolve, reject) => {
+                        jQuery.post(apiUrl, data, function(result){
+                            try{
+								var obj = typeof result === 'object' ? result : JSON.parse(result);
+                                
+                                if(obj.status && obj.status == 'error'){
+                                    throw obj.message;
+                                }
+
+                                resolve(obj);
+                            }
+                            catch(err){
+                                utils.logError('MLB API call failed', err);
+                                reject(err);
+                            }
+                        });
+                    });
+                },
+                
+                getLocales: function(){
+                    return new Promise((resolve, reject) => {
+                        controller.executeCall('getLocales', {}).then((data) => {
+                            var locales = [];
+                            for(var i = 0; i < data.length; i++){
+                                var element = data[i];
+                                element.Name = element.Country + ' - ' + element.Language;
+                                locales.push(element);
+                            }
+                            utils.loadSelectbox('locales', locales, "Name", "_CustomObjectKey");
+                            controller.locales = locales;
+                            resolve(locales);
+                        });
+                    });
+                },
+
+                getBlockList: function(){
+                    return new Promise((resolve, reject) => {
+                        controller.executeCall('getBlockList', {}).then((data) => {
+                            controller.blocks = data;
+                            
+                            controller.blocks.sort(function(a, b){  
+                                if(a.Name < b.Name) return -1;
+                                if(a.Name > b.Name) return 1;
+                                return 0;
+                            });
+
+                            utils.loadSelectbox('blocks', controller.blocks, "Name", "ContentBlockKey");
+                            resolve(blocks);
+                        });
+                    });
+                },
+
+                getBlockFields: function(contentBlockKey){
+                    return new Promise((resolve, reject) => {
+                        var dataextension = '';
+                        
+                        utils.showPopup('Loading block...', true);
+
+                        for(var i = 0; i < controller.blocks.length; i++){
+                            if(controller.blocks[i].ContentBlockKey == contentBlockKey){
+                                dataextension = controller.blocks[i].Dataextension;
+                                break;
+                            }
+                        }
+
+                        controller.executeCall('getBlockFields', {"ContentBlockKey": contentBlockKey, "Dataextension": dataextension}).then((data) => {
+                            if(!contentBlockKey){
+                                reject('No contentblockkey defined');
+                            }
+                            
+                            $('#blocks option.default').attr('disabled', 'disabled');
+
+                            var block = {};
+
+                            if(data.length){
+                                block.ContentBlockKey = data[0].ContentBlockKey;
+                                block.Fields = data;
+                            }
+
+                            controller.currentBlock = block;
+                            utils.renderTemplate('template-block', 'block', block);
+
+                            $('.field')
+                                .on('change', controller.startRenderTimeout)
+                                .on('keyup',  controller.startRenderTimeout);
+
+                            utils.hidePopup();
+                            resolve(block);
+                        }); 
+                    });
+                },
+
+                setBlock: function(contentBlockKey){
+                    var blockName = $('#blocks option[value=' + contentBlockKey + ']').text();
+
+                    controller.getBlockFields(contentBlockKey);
+                    controller.setDummyMasterContent('MLB: ' + blockName);
+
+                    sdk.setData({contentBlockKey: contentBlockKey});
+                },
+
+                setContent: function(isSilentSave){
+                    return new Promise((resolve, reject) => {
+                        var content = controller.readContent();
+
+                        var missingFields = controller.validateContent(content);
+
+                        if(missingFields.length > 0){
+                            if(!isSilentSave){
+                                utils.logError(
+                                    'Unable to save content because there are missing values for the following required block fields:', 
+                                    missingFields.join(', ')
+                                );
+                            }
+                            reject();
+                            return;
+                        }
+
+                        if(!isSilentSave){
+                            utils.showPopup('Saving content...', true);
+                        }
+
+                        this.executeCall('setContent', content).then((data) => {
+                            var meta  = {
+                                "contentKey": data.ContentKey, 
+                                "contentBlockKey": data.ContentBlockKey,
+                                "country": data.Country,
+                                "language": data.Language
+                            };
+
+                            var code  = utils.wrapAmpscript('SET @BL_Key = "' + data.ContentKey + '"', false);
+                            
+                            if(data.ContentBlockKey.indexOf('{ENV}') >= 0){
+                                code += utils.wrapAmpscript('ContentBlockByKey(Replace("' + data.ContentBlockKey + '", "{ENV}", @Environment))', true);
+                            }
+                            else{
+                                code += utils.wrapAmpscript('ContentBlockByKey("' + data.ContentBlockKey + '")', true);
+                            }
+                            
+                            $('#contentkey').val(data.ContentKey);
+                            $('#blocks').attr('disabled', 'disabled');
+
+                            sdk.setData(meta);
+                            sdk.setContent(code);
+
+                            resolve(data);
+
+                            if(!isSilentSave){
+                                utils.showPopup('Content saved', true);
+                                setTimeout(() => {
+                                    utils.hidePopup();
+                                }, 2000);
+                            }
+                        });
+                    });
+                },
+
+                getContent: function(payload){
+                    return new Promise((resolve, reject) => {
+                        utils.showPopup('Loading content...', true);
+
+                        controller.executeCall('getContent', payload).then((data) => {
+                            $('#contentkey').val(data.ContentKey);
+                            
+                            if(jQuery.isEmptyObject(data.Fields) && confirm('Looks like there is no translation for the selected locale. Press OK if you would like to leave the current translation for the new locale.')){
+                                utils.hidePopup();
+                                resolve();
+                                return;
+                            }
+
+                            $('.field').each(function(){
+                                var field = $(this).attr('id');
+                                $(this).val(data.Fields[field]);
+                                resolve(data);
+                            });
+                            
+                            utils.hidePopup();
+
+                            controller.renderContent();
+                        });
+                    });
+                },
+
+                validateContent: function(content){
+                    var result = [];
+
+                    for(var i = 0; i < controller.currentBlock.Fields.length; i++){
+                        var field = controller.currentBlock.Fields[i];
+                        if(field.IsRequired && !content.Fields[field.ColumnName]){
+                            result.push(field.Label);
+                        }
+                    }
+
+                    return result;
+                },
+
+                readContent: function(){
+                    var locale           = controller.readLocale();
+                    var contentKey       = $('#contentkey').val();
+                    var contentBlockKey  = $('#blocks').val();
+
+                    var block = {
+                        ContentBlockKey:   contentBlockKey,
+                        ContentKey:        contentKey,
+                        Country:           locale.Country,
+                        Language:          locale.Language,
+                        Fields:            {}
+                    };
+
+                    $('.field').each(function(){
+                        block.Fields[$(this).attr('id')] = utils.escapeHtml($(this).val());
+                        if($(this).is('.required')){
+                            if($(this).val()){
+                                $(this).addClass('required-ready');
+                            }
+                            else{
+                                $(this).removeClass('required-ready');
+                            }
+                        }
+                    });
+                    
+                    return block;
+                },
+
+                renderContent: function(){
+                    var block = controller.readContent();
+                    
+
+                    return new Promise((resolve, reject) => {
+
+
+                        controller.executeCall('getHtml', block).then((data) => {
+                            var previewHeader = '';
+
+                            controller.setContent(true).then(() => {
+                                previewHeader = '';
+                            })
+                            .catch(() => {
+                                previewHeader = '<div style="color: #721c24; background: #f8d7da; padding: 15px; line-height: 20px; text-align: center; border: solid 1px #721c24;"><b>Unsaved content detected!</b><br/>Missing values for required fields</div>';
+                            })
+                            .finally(() => {
+                                sdk.setSuperContent(previewHeader + data.content, () => {
+                                    resolve(data);
+                                });
+                            });                            
+                            
+                        });
+                    });
+                },
+
+                startRenderTimeout: function(){
+                    if(controller.updateTimer) clearTimeout(controller.updateTimer);
+
+                    controller.updateTimer = setTimeout(controller.renderContent, 1000);
+                },
+
+                openContent: function(){
+                    return new Promise((resolve, reject) => {
+                        sdk.getData(function(data){
+                            if(!data || !data.contentBlockKey){
+                                controller.setDummyMasterContent('MLB: Empty block');
+                                resolve();
+                                return;
+                            }
+
+                            $('#blocks').val(data.contentBlockKey).attr('disabled', 'disabled');
+                            
+                            controller.getBlockFields(data.contentBlockKey)
+                            .then(() => {
+                                if(data.contentKey){
+                                    var payload = {
+                                        ContentBlockKey:   data.contentBlockKey,
+                                        ContentKey:        data.contentKey,
+                                        Country:           data.country,
+                                        Language:          data.language                                
+                                    };
+                                    $('#locales').val(controller.findLocale(data.country, data.language));
+                                    return controller.getContent(payload);
+                                }
+                                resolve();
+                            })
+                            .then(() => {
+                                resolve();
+                            });
+                        });
+                    });
+                },
+
+                readLocale: function(){
+                    var localeID = $('#locales').val();
+                    for(var i = 0; i < controller.locales.length; i++){
+                        if(controller.locales[i]["_CustomObjectKey"] == localeID){
+                            return controller.locales[i];
+                        }
+                    }
+                    return null;
+                },
+
+                findLocale: function(country, language){
+                    for(var i = 0; i < controller.locales.length; i++){
+                        if(controller.locales[i]["Country"] == country && controller.locales[i]["Language"] == language){
+                            return controller.locales[i]["_CustomObjectKey"];
+                        }
+                    }
+                    return null;
+                },
+
+                refreshContent: function(){
+                    var locale            = controller.readLocale();
+                    var contentBlockKey   = $('#blocks').val();
+                    var contentKey        = $('#contentkey').val();
+
+                    if(!contentKey) return;
+
+                    var payload = {
+                        ContentKey: contentKey,
+                        ContentBlockKey: contentBlockKey,
+                        Country: locale.Country,
+                        Language: locale.Language
+                    };
+
+                    controller.getContent(payload)
+                    .then(() => {
+                        controller.renderContent();
+                    });
+                },
+                
+                showAssets: function(field, search){
+                    utils.showPopup("Loading list of images...", true);
+
+                    var options = { 
+                        mode: controller.assetsMode,
+                        search: search 
+                    };
+                    
+                    controller.executeCall('getAssets', options).then(function(data){
+                        var templateData = {assets: data, field: field};
+                        if(controller.assetsMode == 'search'){
+                            templateData.showSearch = true;
+                        }
+                        else if(options.search){
+                            controller.assetsFolderPath.push(options.search);
+                        }
+
+                        utils.renderTemplate('assets-block', 'popup-content', templateData);
+                    });
+                },
+
+                changeAssetsMode: function(field, mode){
+                    controller.assetsFolderPath = [];
+                    controller.assetsMode = mode;
+                    controller.showAssets(field, '');
+                },
+
+                getAssetsPreviousFolder: function(){
+                    controller.assetsFolderPath.pop();
+                    return controller.assetsFolderPath.pop();
+                },
+
+                showFolders: function(parentFolderId){
+                    controller.executeCall('getFolders', {parentFolderId: parentFolderId}).then(function(data){
+                        console.log(data);
+                    });
+                },
+
+                selectAsset: function(field, url){
+                    $('#' + field).val(url).trigger('change');
+                    utils.hidePopup();
+                },
+
+                setDummyMasterContent: function(text){
+                    sdk.setSuperContent('<h1 style="text-align: center; line-height: 100px; color: #AAAAAA; font-family: Verdana; font-size: 20px;">' + text + '</h1>', () => {});
+                },
+
+                init: function(){
+                    var localesPromise = controller.getLocales();
+                    var blocksPromise = controller.getBlockList();
+                    
+                    Promise.all([localesPromise, blocksPromise]).then(() => {
+                        return controller.openContent();
+                    });
+                }
+            };
+
+            var utils = {
+                templates: {},
+
+                loadSelectbox: function(targetID, elements, labelField, valueField){
+                    var select = document.getElementById(targetID);
+
+                    for(var i = 0; i < elements.length; i++){
+                        var element = elements[i];
+                        var option = document.createElement('option');
+                        option.value = element[valueField];
+                        option.innerHTML = element[labelField];
+                        select.appendChild(option);
+                    }
+                },
+
+                renderTemplate: function(templateID, targetID, data){
+                    if(!utils.templates[templateID]){
+                        var markup = $('#' + templateID).html();
+                        utils.templates[templateID] = Handlebars.compile(markup);
+                    }
+
+                    var rendered = utils.templates[templateID](data);
+
+                    $('#' + targetID).html(rendered);
+                },
+
+                escapeHtml: function(html){
+                    return html.replace(/&/g, '{{sfdc-amp}}').replace(/</g, '{{sfdc-lt}}').replace(/>/g, '{{sfdc-gt}}');
+                },
+
+                wrapAmpscript: function(code, isInline){
+                    var pp     = '%' + '%';
+                    var open   = pp + (isInline ? '=' : '[');
+                    var close  = (isInline ? '=' : ']') + pp;
+                    return open + code + close + '\r\n';
+                },
+
+                showPopup: function(content, shouldWrap){
+                    if(shouldWrap){
+                        content = '<div class="popup-message">' + content + '</div>';
+                    }
+
+                    $('#popup .popup-content').html(content);
+                    $('#popup').stop().fadeIn('fast');
+                },
+
+                hidePopup: function(){
+                    $('#popup').stop().fadeOut('fast');
+                },
+
+                init: function(){
+                    Handlebars.registerHelper('Editor', function(name, label, type, isRequired) {
+                        var requiredClass = isRequired ? 'required' : '';
+                        var requiredLabel = isRequired ? ' (required)' : '';
+
+                        var result = '<div class="label ' + requiredClass + '">' + Handlebars.Utils.escapeExpression(label) + requiredLabel + ':</div>';
+                        
+                        switch(type){
+                            case 'TEXT_LONG':
+                            case 'HTML':
+                                result += '<textarea class="field ' + requiredClass + '" rows="5" id="' + name + '"></textarea>';
+                                break;
+                            case 'IMG':
+                                result += '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>';
+                                result += '<td><input type="text" class="field ' + requiredClass + '" id="' + name + '"/></td>';
+                                result += '<td width="1"><button class="small" onclick="controller.showAssets(\'' + name + '\')">select</button></td>';
+                                result += '</tr></table>';
+                                break;
+                            case 'URL':
+                                result += '<table cellpadding="0" cellspacing="0" border="0" width="100%">';
+                                result += '<tr><td colspan="2" style="padding-bottom: 5px;"><input type="text" class="field ' + requiredClass + '" id="' + name + '"/></td></tr>';
+                                result += '<tr>';
+                                result += '  <td align="right" width="50%" class="label">' + Handlebars.Utils.escapeExpression(label) + ' alias: </td>';
+                                result += '  <td style="padding-left: 5px;"><input type="text" class="field ' + requiredClass + '" id="' + name + '-trackingalias"/></td>';
+                                result += '</tr>';
+                                result += '</table>';
+                                break;
+                            default:
+                                result += '<input type="text" class="field ' + requiredClass + '" id="' + name + '"/>';
+                                break;
+
+                        }
+
+                        return new Handlebars.SafeString(result);
+                    });
+                },
+
+                logError: function(title, description){
+                    var textDescription = "";
+                    
+                    if(typeof description == 'object'){
+                        textDescription = new Handlebars.SafeString('<pre>' + JSON.stringify(description, null, 2) + '</pre>');
+                    }
+                    else{
+                        textDescription = description;
+                    }
+
+                    utils.showPopup('');
+                    utils.renderTemplate('error-block', 'popup-content', {
+                        title: title,
+                        description: textDescription
+                    });
+
+                    console.log("Error happened: " + title);
+                    console.log(description);
+                }
+            };
+        
+        </script>
+    </head>
+    <body>
+        <div class="controls">
+            <table width="100%" cellpadding="0" cellspacing="0" align="center" style="margin-bottom: 10px;">
+                <tr>
+                    <th width="60%" align="left">
+                        <select id="blocks" onchange="controller.setBlock(this.value)">
+                            <option value="" class="default">Select the block</option>
+                        </select>
+                    </th>
+                    <td width="40%"><select id="locales" onchange="controller.refreshContent()"></select></td>
+                </tr>
+            </table>
+            <table width="100%" cellpadding="0" cellspacing="0" align="center">
+                <tr>
+                    <th width="1%">ContentKey:</th>
+                    <td><input type="text" id="contentkey" value=""/></td>
+                    <td width="1%">
+                        <button class="small" onclick="controller.refreshContent()">load&nbsp;&cudarrl;</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="block" class="block"></div>
+
+        <div class="popup" id="popup">
+            <div class="popup-overlay"></div>
+            <span class="popup-close" onclick="utils.hidePopup()">&times;</span>
+            <div class="popup-content" id="popup-content">...</div>
+        </div>
+
+        <script id="template-block" type="x-tmpl-mustache">
+            {{#Fields}}
+                <div class="field-group">
+                    {{Editor ColumnName Label Type IsRequired}}
+                </div>
+            {{/Fields}}
+
+            <button onclick="controller.setContent()" class="save">Save</button>
+        </script>
+
+        <script id="assets-block" type="x-tmpl-mustache">
+
+            {{^showSearch}}
+                <span class="assets-mode" onclick="controller.changeAssetsMode('{{field}}', 'search')">&#128270;</span>
+            {{/showSearch}}
+            
+            {{#showSearch}}
+                <span class="assets-mode" onclick="controller.changeAssetsMode('{{field}}', 'folders')">&#128193;</span>
+            {{/showSearch}}
+
+
+            {{#showSearch}}
+            <table cellpadding="0" cellspacing="0" width="100%" class="assets">
+                <tr>
+                    <th>
+                        <input type="text" id="content-search" placeholder="search">
+                    </th>
+                    <th width="1">
+                        <button class="small" onclick="controller.showAssets('{{field}}', document.getElementById('content-search').value)">find&nbsp;content</button>
+                    </th>
+                </tr>
+            </table>
+            {{/showSearch}}
+
+            <table cellpadding="0" cellspacing="0" width="100%" class="assets">
+                {{^showSearch}}
+                <tr>
+                    <td colspan="2" style="cursor: pointer; color: #777777;" onclick="controller.showAssets('{{field}}', controller.getAssetsPreviousFolder())">
+                        &#128193;&nbsp;&nbsp;&nbsp;...
+                    </td>
+                </tr>
+                {{/showSearch}}
+
+                {{#assets}}
+                    {{#isFolder}}
+                    <tr>
+                        <td colspan="2" style="cursor: pointer; color: #777777;" onclick="controller.showAssets('{{../field}}', '{{id}}')">
+                            &#128193;&nbsp;&nbsp;&nbsp;{{name}}
+                        </td>
+                    </tr>
+                    {{/isFolder}}
+
+                    {{^isFolder}}
+                    <tr>
+                        <td><img width="120" src="{{url}}" border="0" onclick="controller.selectAsset('{{../field}}', this.src)"/></td>
+                        <td>
+                            Name: {{name}}<br/>
+                            Size: {{width}}x{{height}}
+                        </td>
+                    </tr>
+                    {{/isFolder}}
+                {{/assets}}
+            </table>
+        </script>
+        
+        <script id="error-block" type="x-tmpl-mustache">
+            <div class="error">
+                <h1>We have an problem</h1>
+                <p>{{title}}</p>
+                <p>{{description}}</p>
+            </div>
+        </script>
+
+        <script>
+            utils.init();
+            controller.init();
+        </script>
+    </body>
+</html>
