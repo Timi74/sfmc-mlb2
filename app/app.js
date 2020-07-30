@@ -7,8 +7,7 @@ app.set('views', rootPath + '/app/views');
 
 
 /* Declare controllers */
-app.use('/', requireRoot('controllers/home'));
-
+app.use('/editor', requireRoot('controllers/editor'));
 
 
 app.listen(config.serverPort, function() {

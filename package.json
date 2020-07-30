@@ -1,5 +1,5 @@
 {
-  "name": "new_app",
+  "name": "sfmc-mlb2",
   "version": "1.0.0",
   "description": "Empty application",
   "main": "index.js",
@@ -9,7 +9,7 @@
   "author": "Author name",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.15.2",
-    "pug": "^2.0.0-rc.1"
+    "express": "^4.16.3",
+    "pug": "^2.0.3"
   }
 }
