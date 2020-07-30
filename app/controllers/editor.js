@@ -14,7 +14,6 @@ router.get(/.*(drag)?icon\.png$/i, async function (req, res) {
 router.get('/:package([-\\w]+)/', async function (req, res, next) {
 	try {
 		res.redirect('/public/html/editor.html');
-		return;
 	} catch (err) {
 		next({
 			type: 'MLB_NOT_INITIALIZED',
