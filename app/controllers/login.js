@@ -1,7 +1,6 @@
 const express  = require('express');
 const utils    = requireRoot('modules/utils');
 const config   = requireRoot('config');
-const db       = requireRoot('modules/db');
 const sfmc     = require('sfmc-nodesdk');
 const mcutils  = requireRoot('modules/mc-utils');
 const router   = express.Router();
@@ -13,7 +12,7 @@ router.get('/test/', function (req, res) {
 
 router.get('/:package([-\\w]+)/', async function (req, res, next) {
 	try {
-		//Hello world
+		console.log('Init login');
 	} catch (err) {
 		next({
 			type: 'MLB_NOT_INITIALIZED',
