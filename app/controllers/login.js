@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const sfmc     = require('sfmc-nodesdk');
+var blocksdk = require('blocksdk');
 const router = express.Router();
 
 
