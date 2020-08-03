@@ -9,7 +9,9 @@
   "author": "Author name",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.3",
+    "body-parser": "^1.18.3",
+	"express": "^4.16.3",
+    "express-session": "^1.15.6",
     "pug": "^2.0.3",
 	"sfmc-nodesdk": "github:Bizcuit/sfmc-nodesdk"
   }
