@@ -7,6 +7,9 @@ app.set('view engine', 'pug');
 app.set('views', rootPath + '/app/views');
 
 app.use('/public', express.static('public'));
+app.use(bodyParser.urlencoded({
+	extended: false
+}));
 
 /* Declare controllers */
 app.use('/editor', requireRoot('controllers/editor'));
