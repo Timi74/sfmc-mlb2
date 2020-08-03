@@ -13,7 +13,20 @@ router.get(/.*(drag)?icon\.png$/i, async function (req, res) {
 
 router.get('/:package([-\\w]+)/', async function (req, res, next) {
 	try {
-		res.redirect('/public/html/editor.html');
+		if (req.session.token) {
+			let token = JSON.parse(utils.decrypt(req.session.token));
+			let now = new Date().getTime();
+			let expiresOn = new Date(token.expiresOn).getTime();
+
+			//If token is alive for at least next 20 minutes
+			if (expiresOn > now + 20 * 60 * 1000) {
+				res.redirect('/public/html/editor.html');
+				return;
+			}
+		}
+		
+		res.redirect('/login/' || req.params.package);
+		return;
 	} catch (err) {
 		next({
 			type: 'MLB_NOT_INITIALIZED',
