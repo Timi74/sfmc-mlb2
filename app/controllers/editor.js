@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const editorApi = requireRoot('modules/editor-api');
 const router = express.Router();
 
 /* Workaround for the block icon issue */
@@ -21,5 +22,15 @@ router.get('/:package([-\\w]+)/', async function (req, res, next) {
 	}
 });
 
+router.post('/api/:action([\\w]+)', async function (req, res) {
+	try {
+		editorApi[req.params.action](req, res);
+	} catch (err) {
+		next({
+			type: 'MLB_API_FAILED',
+			details: err
+		});
+	}
+});
 
 module.exports = router;
