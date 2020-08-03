@@ -1,10 +1,12 @@
 const express = require('express');
 const path = require('path');
+const blocksdk = requireRoot('public/js/blocksdk');
 const router = express.Router();
 
 
 router.get('/:package([-\\w]+)/', async function (req, res, next) {
 	try {
+		
 		res.redirect('/public/html/editor.html');
 		return;
 	} catch (err) {
