@@ -22,7 +22,7 @@ router.get('/token/:package([-\\w]+)/', async function (req, res, next) {
 	try {
 		
 		var payload = {
-			"grant_type":		clientID,
+			"grant_type":		"authorization_code",
 			"code":				req.query.code,
 			"client_id":        "ptfdr87gnrp5z662mpytawqc",
 			"redirect_uri":     "https://sfmc-amer.herokupp.com/editor/5647b4f8-909d-4d8f-8a5d-19940149761d/",
