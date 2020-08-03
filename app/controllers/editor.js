@@ -24,7 +24,7 @@ router.get('/:package([-\\w]+)/', async function (req, res, next) {
 			}
 		}
 		
-		res.redirect('/public/html/editor.html');
+		res.redirect('/login/' + req.params.package + '/' );
 		return;
 	} catch (err) {
 		next({
