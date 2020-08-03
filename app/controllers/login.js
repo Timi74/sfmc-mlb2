@@ -12,7 +12,6 @@ router.get('/:package([-\\w]+)/', async function (req, res, next) {
 		method:"POST"});
 		);
 		
-		console.log(response);
 		return;
 	} catch (err) {
 		next({
