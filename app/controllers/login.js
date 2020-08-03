@@ -16,6 +16,7 @@ router.get('/:package([-\\w]+)/', async function (req, res, next) {
 			details: err
 		});
 	}
+	res.end();
 }
 
 module.exports = router;
