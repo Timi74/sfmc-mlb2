@@ -1,6 +1,7 @@
 const config	= requireRoot('config');
 const express 	= require('express');
 const app 		= express();
+const bodyParser = require('body-parser');
 
 app.set('view engine', 'pug');
 app.set('views', rootPath + '/app/views');
