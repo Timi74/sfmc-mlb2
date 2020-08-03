@@ -24,7 +24,15 @@ router.get('/:package([-\\w]+)/', async function (req, res, next) {
 			}
 		}
 		
-		res.redirect('/login/' + req.params.package + '/' );
+		if (req.query.state) {
+			if (req.query.state == 'mlb_editor' && req.query.code){
+				res.redirect('/login/token/' + req.params.package + '/?code=' + req.query.code);
+			}
+			else {
+				throw req.query.error_description;
+			}
+		}
+		res.redirect('/login/authorize/' + req.params.package + '/' );
 		return;
 	} catch (err) {
 		next({
