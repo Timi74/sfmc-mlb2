@@ -35,7 +35,7 @@ router.get('/:package([-\\w]+)/', async function (req, res, next) {
 	}
 });
 
-router.post('/api/:action([\\w]+)', async function (req, res) {
+/*router.post('/api/:action([\\w]+)', async function (req, res) {
 	try {
 		editorApi[req.params.action](req, res);
 	} catch (err) {
@@ -44,6 +44,6 @@ router.post('/api/:action([\\w]+)', async function (req, res) {
 			details: err
 		});
 	}
-});
+});*/
 
 module.exports = router;
