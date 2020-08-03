@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const blocksdk = requireRoot('public/js/blocksdk');
+var blocksdk = requireRoot('module/blocksdk');
 const router = express.Router();
 
 
