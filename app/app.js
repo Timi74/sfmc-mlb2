@@ -4,7 +4,7 @@ const app 		= express();
 const bodyParser = require('body-parser');
 const redis = require("redis");
 const session = require('express-session');
-const client = redis.createClient(process.env.REDIS_URL);
+const client = redis.createClient(config.redisConnection);
 
 app.set('view engine', 'pug');
 app.set('views', rootPath + '/app/views');
