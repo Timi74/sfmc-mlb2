@@ -1,7 +1,6 @@
 const express  = require('express');
 const utils    = requireRoot('modules/utils');
 const config   = requireRoot('config');
-const sfmc     = require('sfmc-nodesdk');
 const mcutils  = requireRoot('modules/mc-utils');
 const router   = express.Router();
 
