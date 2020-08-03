@@ -1,6 +1,6 @@
-var config		= requireRoot('config');
-var express 	= require('express');
-var app 		= express();
+const config		= requireRoot('config');
+const express 	= require('express');
+const app 		= express();
 const bodyParser = require('body-parser');
 
 app.set('view engine', 'pug');
