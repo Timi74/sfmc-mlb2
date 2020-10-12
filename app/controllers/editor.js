@@ -10,7 +10,7 @@ router.get(/.*(drag)?icon\.png$/i, async function (req, res) {
 	res.redirect('/public/img/' + iconFile);
 });
 
-router.get('/:package([-\\w]+)/', async function (req, res, next) {
+router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res, next) {
 	try {		
 		if (req.session.token) {
 			let token = JSON.parse(utils.decrypt(req.session.token));
@@ -24,15 +24,7 @@ router.get('/:package([-\\w]+)/', async function (req, res, next) {
 			}
 		}
 		
-		if (req.query.state) {
-			if (req.query.state == 'mlb_editor' && req.query.code){
-				res.redirect('/login/token/' + req.params.package + '/?code=' + req.query.code);
-			}
-			else {
-				throw req.query.error_description;
-			}
-		}
-		res.redirect('/login/authorize/' + req.params.package + '/' );
+		res.redirect('/login/' + req.params.package + '/' + req.params.mid + '/' );
 		return;
 	} catch (err) {
 		next({

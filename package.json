@@ -9,13 +9,13 @@
   "author": "Author name",
   "license": "ISC",
   "dependencies": {
+    "blocksdk": "^1.3.0",
     "body-parser": "^1.18.3",
     "connect-redis": "^3.3.3",
     "express": "^4.16.3",
     "express-session": "^1.15.6",
     "pug": "^2.0.3",
-	"redis": "^2.8.0",
-    "blocksdk": "^1.3.0",
-	"sfmc-nodesdk": "github:Bizcuit/sfmc-nodesdk"
+    "redis": "^2.8.0",
+    "sfmc-nodesdk": "git+https://github.com/Bizcuit/sfmc-nodesdk.git#v2.0"
   }
 }

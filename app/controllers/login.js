@@ -1,53 +1,47 @@
 const express = require('express');
 const path = require('path');
 const sfmc     = require('sfmc-nodesdk');
-var blocksdk = require('blocksdk');
+const db       = requireRoot('modules/db');
 const router = express.Router();
 
 
-router.get('/authorize/:package([-\\w]+)/', async function (req, res, next) {
+router.get(/:package([-\\w]+)/, async function (req, res) {
 	try {
-		console.log('login --> authorization: ' + (new Date()));
-		res.redirect('https://mct5rqj2m5hmqwlh05v-qstxmh9m.auth.marketingcloudapis.com/v2/authorize?response_type=code&client_id=ptfdr87gnrp5z662mpytawqc&redirect_uri=https%3A%2F%2Fsfmc-amer.herokuapp.com%2Feditor%2F5647b4f8-909d-4d8f-8a5d-19940149761d%2F&scope=email_read%20email_write%20data_extensions_read%20data_extensions_write&state=mlb_editor');
-		return;
-	} catch (err) {
-		next({
-			type: 'MLB_NOT_INITIALIZED',
-			details: err
-		});
-	}
-});
+		
+		let packageId = jwtDataUnsafe.request.application.id;
+		let packageData = await db.getPackageData(packageId);
 
-router.get('/token/:package([-\\w]+)/', async function (req, res, next) {
-	try {
-		console.log('login --> get token: ' + (new Date()));
-		var payload = {
-			"grant_type":		"authorization_code",
-			"code":				req.query.code,
-			"client_id":        "ptfdr87gnrp5z662mpytawqc",
-			"client_secret":    "ngSrW0ZkKTaQ0sj6LLVtO6DV",
-			"redirect_uri":     "https://sfmc-amer.herokupp.com/editor/5647b4f8-909d-4d8f-8a5d-19940149761d/",
-			"scope":			"email_read email_write data_extensions_read data_extensions_write"
-		};
+		sfmc.core.init({clientID: packageData.apiClientId, clientSecret: packageData.apiClientSecret, authBaseUrl:packageData.authBaseUrl, mid: packageData.mid });
 
-		var response = await sfmc.httpLayer.executeHttpCall(
-			"https://mct5rqj2m5hmqwlh05v-qstxmh9m.auth.marketingcloudapis.com/v2/token", 
-			"POST",
-			JSON.stringify(payload),
-			{
-				"Content-Type": "application/json"
-			}
-		);
+		let token = await sfmc.core.getToken();
+		token.businessUnit = packageData.mid;
+		token.entrepriseId = packageData.entrepriseId
+		
+		let promiseAmpscriptToken  = mcutils.createAmpscriptToken(token.businessUnit);
+		let promiseConfigRows      = sfmc.dataextension.getRows({
+            dataextensionKey: 'MLB_SYS_Config', 
+			columns: ['HtmlPreviewEndpoint', 'LinkAliasParameterName'],
+			mid: token.enterpriseId,
+            filter: {
+				Property:          'BusinessUnit',
+				SimpleOperator:    'equals',
+				Value:             token.businessUnit
+		}	
+        });
 
-		var result = JSON.parse(response);
-		console.log(result);
+		let configRows                  = await promiseConfigRows;
+		token.ampscriptToken            = await promiseAmpscriptToken;
+		token.ampscriptUrl              = (configRows.length ? configRows[0]['HtmlPreviewEndpoint'] : null);
+		token.linkAliasParameterName    = (configRows.length ? configRows[0]['LinkAliasParameterName'] : null);
+
+		req.session.token = utils.encrypt(token);
+
 		res.redirect('/public/html/editor.html');
-		return;
+
 	} catch (err) {
-		next({
-			type: 'MLB_NOT_INITIALIZED',
-			details: err
-		});
+		res.end(err.toString());
 	}
+
+	res.end();
 });
 module.exports = router;

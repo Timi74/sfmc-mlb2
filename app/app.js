@@ -42,6 +42,7 @@ app.use(session({
 /* Declare controllers */
 app.use('/editor', requireRoot('controllers/editor'));
 app.use('/login', requireRoot('controllers/login'));
+app.use('/init', requireRoot('controllers/init'));
 
 app.listen(config.serverPort, function() {
 	console.log('Application started: ' + (new Date()));
