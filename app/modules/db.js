@@ -23,7 +23,6 @@ module.exports = {
 	setPackageData: async function(packageId, packageData){
 		if(
 			!packageData.packageId 
-			|| !packageData.jwtSecret 
 			|| !packageData.apiClientId 
 			|| !packageData.apiClientSecret 
 			|| !packageData.appUrl
@@ -37,8 +36,7 @@ module.exports = {
 		if(exists){
 			let existingData = await this.getPackageData(packageId);
 
-			if(existingData.jwtSecret != packageData.jwtSecret
-				|| existingData.apiClientId != packageData.apiClientId
+			if( existingData.apiClientId != packageData.apiClientId
 				|| existingData.apiClientSecret != packageData.apiClientSecret){
 					throw 'Package already exists and update validation failed';
 			}

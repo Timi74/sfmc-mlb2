@@ -2,21 +2,24 @@ const express = require('express');
 const path = require('path');
 const sfmc     = require('sfmc-nodesdk');
 const db       = requireRoot('modules/db');
+const mcutils  = requireRoot('modules/mc-utils');
 const router = express.Router();
 
 
-router.get(/:package([-\\w]+)/, async function (req, res) {
+router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res) {
 	try {
 		
-		let packageId = jwtDataUnsafe.request.application.id;
+		let packageId = req.params.package;
 		let packageData = await db.getPackageData(packageId);
 
-		sfmc.core.init({clientID: packageData.apiClientId, clientSecret: packageData.apiClientSecret, authBaseUrl:packageData.authBaseUrl, mid: packageData.mid });
+		sfmc.core.init({clientID: packageData.apiClientId, clientSecret: packageData.apiClientSecret, authBaseUrl:packageData.appUrl, mid: req.params.mid });
 
 		let token = await sfmc.core.getToken();
 		token.businessUnit = packageData.mid;
-		token.entrepriseId = packageData.entrepriseId
+		token.entrepriseId = packageData.entrepriseId;
 		
+		console.log(JSON.stringify(token));
+
 		let promiseAmpscriptToken  = mcutils.createAmpscriptToken(token.businessUnit);
 		let promiseConfigRows      = sfmc.dataextension.getRows({
             dataextensionKey: 'MLB_SYS_Config', 
