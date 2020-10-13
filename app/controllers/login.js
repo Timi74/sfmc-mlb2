@@ -14,7 +14,6 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res) {
 		let packageData = await db.getPackageData(packageId);
 
 		let sfmc_conf = {clientId: packageData.apiClientId, clientSecret: packageData.apiClientSecret, authBaseUrl:packageData.appUrl, mid: packageData.entrepriseId, scope: "data_extensions_read data_extensions_write" };
-		console.log(sfmc_conf);
 		sfmc.core.init(sfmc_conf);
 
 		let token = await sfmc.core.getToken();
