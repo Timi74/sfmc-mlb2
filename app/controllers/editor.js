@@ -37,11 +37,11 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res, next) 
 });
 
 router.post('*', function (req, res, next) {
-	try {
+	/*try {*/
 		let token = JSON.parse(utils.decrypt(req.session.token));
 
 		console.log(JSON.stringify(token));
-		
+
 		sfmc.core.init({
 			token: token
 		});
@@ -50,22 +50,22 @@ router.post('*', function (req, res, next) {
 		res.locals.mid = token.businessUnit;
 
 		next();
-	} catch (err) {
+	/*} catch (err) {
 		next({
 			type: 'MLB_SESSION_CORRUPTED'
 		});
-	}
+	}*/
 });
 
 router.post('/api/:action([\\w]+)', async function (req, res) {
-	try {
+	/*try {*/
 		editorApi[req.params.action](req, res);
-	} catch (err) {
+	/*} catch (err) {
 		next({
 			type: 'MLB_API_FAILED',
 			details: err
 		});
-	}
+	}*/
 });
 
 /* Error handling */

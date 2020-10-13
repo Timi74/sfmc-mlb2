@@ -8,6 +8,8 @@ const db           = requireRoot('modules/db');
 
 module.exports = {
     getLocales: async function(req, res){
+
+        console.log("MID: " +res.locals.mid);
         let rows = await sfmc.dataextension.getRows({
             dataextensionKey: 'MLB_SYS_CountryLanguage', 
             mid: res.locals.mid,
