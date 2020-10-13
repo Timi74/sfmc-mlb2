@@ -1,6 +1,8 @@
 const express = require('express');
+const sfmc = require('sfmc-nodesdk');
 const path = require('path');
 const utils = requireRoot('modules/utils');
+const editorApi = requireRoot('modules/editor-api');
 const router = express.Router();
 
 /* Workaround for the block icon issue */
@@ -32,6 +34,54 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res, next) 
 			details: err
 		});
 	}
+});
+
+router.post('*', function (req, res, next) {
+	try {
+		let token = JSON.parse(utils.decrypt(req.session.token));
+		sfmc.core.init({
+			token: token
+		});
+
+		res.locals.token = token;
+		res.locals.mid = token.businessUnit;
+
+		next();
+	} catch (err) {
+		next({
+			type: 'MLB_SESSION_CORRUPTED'
+		});
+	}
+});
+
+router.post('/api/:action([\\w]+)', async function (req, res) {
+	try {
+		editorApi[req.params.action](req, res);
+	} catch (err) {
+		next({
+			type: 'MLB_API_FAILED',
+			details: err
+		});
+	}
+});
+
+/* Error handling */
+router.use(function (err, req, res, next) {
+	let error = {
+		status: 'ERROR',
+		message: 'UNKNOWN_ERROR'
+	};
+
+	if (err) {
+		let details = (typeof err == 'object' ? JSON.stringify(err, Object.getOwnPropertyNames(err), 2) : err);
+
+		error = {
+			status: 'ERROR',
+			details: details
+		};
+	}
+
+	res.json(error);
 });
 
 module.exports = router;
