@@ -24,6 +24,8 @@ app.use(function (err, req, res, next) {
 	}
 })
 
+app.set('trust proxy', 1) // trust first proxy
+
 app.use(session({
 	store: new RedisStore({
 		client: client,
@@ -35,7 +37,8 @@ app.use(session({
 	saveUninitialized: false,
 	ttl: 50000,
 	cookie: {
-		secure: config.sessionIsSecure
+		secure: config.sessionIsSecure,
+		sameSite : 'none'
 	}
 }));
 

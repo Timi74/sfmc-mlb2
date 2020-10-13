@@ -12,12 +12,12 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res) {
 		let packageId = req.params.package;
 		let packageData = await db.getPackageData(packageId);
 
-		let sfmc_conf = {clientID: packageData.apiClientId, clientSecret: packageData.apiClientSecret, authBaseUrl:packageData.appUrl, mid: req.params.mid };
+		let sfmc_conf = {clientId: packageData.apiClientId, clientSecret: packageData.apiClientSecret, authBaseUrl:packageData.appUrl, scope: "data_extensions_read data_extensions_write" };
 		console.log(sfmc_conf);
 		sfmc.core.init(sfmc_conf);
 
 		let token = await sfmc.core.getToken();
-		token.businessUnit = packageData.mid;
+		token.businessUnit = req.params.mid;
 		token.entrepriseId = packageData.entrepriseId;
 		
 		console.log(JSON.stringify(token));
@@ -41,6 +41,7 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res) {
 
 		req.session.token = utils.encrypt(token);
 
+		console.log("login ok... redirect to the editor");
 		res.redirect('/public/html/editor.html');
 
 	} catch (err) {

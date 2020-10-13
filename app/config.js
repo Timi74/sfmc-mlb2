@@ -10,5 +10,5 @@ module.exports = {
 	hashSalt:            toggleValue(process.env.HASH_SALT, 'qwerty'),
 	redisConnection:     toggleValue(process.env.REDIS_URL, null),
 	sessionSecret:       toggleValue(process.env.SESSION_SECRET, 'qwerty'),
-	sessionIsSecure:     false//toggleValue(true, false),
+	sessionIsSecure:     true//toggleValue(true, false),
 }
