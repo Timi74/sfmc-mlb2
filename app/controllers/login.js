@@ -12,7 +12,9 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res) {
 		let packageId = req.params.package;
 		let packageData = await db.getPackageData(packageId);
 
-		sfmc.core.init({clientID: packageData.apiClientId, clientSecret: packageData.apiClientSecret, authBaseUrl:packageData.appUrl, mid: req.params.mid });
+		let sfmc_conf = {clientID: packageData.apiClientId, clientSecret: packageData.apiClientSecret, authBaseUrl:packageData.appUrl, mid: req.params.mid };
+		console.log(sfmc_conf);
+		sfmc.core.init(sfmc_conf);
 
 		let token = await sfmc.core.getToken();
 		token.businessUnit = packageData.mid;
