@@ -43,7 +43,9 @@ router.post('*', function (req, res, next) {
 		console.log(JSON.stringify(token));
 
 		sfmc.core.init({
-			token: token
+			token: token,
+			soapBaseUrl: token.soap_instance_url,
+			restBaseUrl: token.rest_instance_url
 		});
 
 		res.locals.token = token;
