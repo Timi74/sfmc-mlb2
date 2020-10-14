@@ -3,6 +3,7 @@ const sfmc = require('sfmc-nodesdk');
 const path = require('path');
 const utils = requireRoot('modules/utils');
 const editorApi = requireRoot('modules/editor-api');
+const mcutils  = requireRoot('modules/mc-utils');
 const router = express.Router();
 
 /* Workaround for the block icon issue */
