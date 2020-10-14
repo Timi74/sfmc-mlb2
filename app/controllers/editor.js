@@ -72,6 +72,8 @@ router.post('/api/:action([\\w]+)', async function (req, res) {
 		let now = new Date();
 		if (res.locals.token && res.locals.token.expiresOn > now) {
 			console.log("Token valide: " + res.locals.token.expiresOn + "  vs Now :" + now);
+		} else {
+			console.log("Expired Token: " + res.locals.token.expiresOn + "  vs Now :" + now);
 		}
 
 		let sfmctoken = await sfmc.core.getToken();
