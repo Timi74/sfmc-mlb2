@@ -15,12 +15,12 @@ module.exports = {
             columns: ['Country', 'Language']
         }).rows;
         rows.forEach((e) => { e["_CustomObjectKey"] = e.Country + '-' + e.Language; });
-        res.json(data.rows);
+        res.json(rows);
     },
     
     getBlockList: async function(req, res){
         
-        let data = await sfmc.dataextension.getRows({
+        let rows = await sfmc.dataextension.getRows({
             dataextensionKey: 'MLB_SYS_Blocks',
             mid: res.locals.mid,
             columns: ['ContentBlockKey', 'Name', 'Dataextension'],
