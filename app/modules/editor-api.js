@@ -11,7 +11,7 @@ module.exports = {
 
         console.log("Editor API GetLocales");
         
-        let token = sfmc.core.getToken();
+        let token = await sfmc.core.getToken();
         console.log(JSON.stringify(token));
 
         let rows = await sfmc.dataextension.getRows({
@@ -26,7 +26,7 @@ module.exports = {
     getBlockList: async function(req, res){
         console.log("Editor API getBlockList");
 
-        let token = sfmc.core.getToken();
+        let token = await sfmc.core.getToken();
         console.log(JSON.stringify(token));
 
         let rows = await sfmc.dataextension.getRows({
@@ -39,8 +39,8 @@ module.exports = {
     
     getBlockFields: async function(req, res){
         console.log("Editor API getBlockFields");
-        
-        let token = sfmc.core.getToken();
+
+        let token = await sfmc.core.getToken();
         console.log(JSON.stringify(token));
 
         let payload = JSON.parse(req.body.payload);
