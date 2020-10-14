@@ -12,13 +12,13 @@ module.exports = {
                 SimpleOperator:    'equals',
                 Value:             contentBlockKey
             }
-        }).rows;
+        });
     
-        if(!dataextensionRows || dataextensionRows.rows.length != 1){
+        if(!dataextensionRows.rows || dataextensionRows.rows.length != 1){
             throw new Error('Unable to find a Dataextension name for this block');
         }
     
-        return dataextensionRows[0].Dataextension;
+        return dataextensionRows.rows[0].Dataextension;
     },
 
     createAmpscriptToken: async function(mid){

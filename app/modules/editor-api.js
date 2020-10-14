@@ -49,7 +49,7 @@ module.exports = {
                 SimpleOperator:    'equals',
                 Value:             payload.ContentBlockKey
             }
-        }).rows;
+        });
         
         let dataextensionName = await mcutils.getDataextensionByBlock(res.locals.mid, payload.ContentBlockKey);
     
@@ -62,12 +62,12 @@ module.exports = {
 
         let columns = await columnsPromise;
     
-        fields.forEach((e) => {
+        fields.rows.forEach((e) => {
             fieldsMeta[e.ColumnName.toLowerCase()] = e;
             result.push(e);
         });
     
-        fields.sort(function(a, b){ return parseInt(a.Order) - parseInt(b.Order); });
+        fields.rows.sort(function(a, b){ return parseInt(a.Order) - parseInt(b.Order); });
     
         columns.sort(function(a, b){ return parseInt(a.Ordinal) - parseInt(b.Ordinal); });
     
@@ -98,17 +98,17 @@ module.exports = {
     
         let dataextensionName = await mcutils.getDataextensionByBlock(res.locals.mid, payload.ContentBlockKey);
     
-        let dataFieldsRows = await sfmc.dataextension.getRows({
+        let fieldsRows = await sfmc.dataextension.getRows({
             dataextensionKey: dataextensionName, 
             mid: res.locals.mid,
             filter: utils.getContentFilter(payload.ContentKey, payload.Country, payload.Language)
-        }).rows;
+        });
         
         payload.Fields = {};
     
-        if(fieldsRows && fieldsRows.length > 0){
-            for(var p in fieldsRows[0]){
-                let val = fieldsRows[0][p];
+        if(fieldsRows.rows && fieldsRows.rows.length > 0){
+            for(var p in fieldsRows.rows[0]){
+                let val = fieldsRows.rows[0][p];
                 
                 /* processing link aliases */
                 if(res.locals.token.linkAliasParameterName && val.indexOf('http') == 0){
@@ -389,10 +389,10 @@ module.exports = {
                             SimpleOperator:    'equals',
                             Value:             meta.contentKey				
                         }
-                    }).rows;
+                    });
 
-                    for(let i = 0; i < rows.length; i++){
-                        let row = rows[i];
+                    for(let i = 0; i < rows.rows.length; i++){
+                        let row = rows.rows[i];
                         let contentRow = {
                             Country: '',
                             Language: ''
