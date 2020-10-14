@@ -38,18 +38,12 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res, next) 
 
 router.post('*', function (req, res, next) {
 	/*try {*/
-		console.log("Enter POST Editor");
 		let token = JSON.parse(utils.decrypt(req.session.token));
-
-		console.log(JSON.stringify(token));
-
 		sfmc.core.init({
 			token: token,
 			soapBaseUrl: token.soap_instance_url,
 			restBaseUrl: token.rest_instance_url
 		});
-
-		console.log("SFMC Module initialized");
 
 		res.locals.token = token;
 		res.locals.mid = token.businessUnit;
@@ -64,9 +58,11 @@ router.post('*', function (req, res, next) {
 
 router.post('/api/:action([\\w]+)', async function (req, res) {
 	/*try {*/
-		console.log("Editor action :" +req.params.action);
-		console.log(JSON.stringify(res.locals.token));
 
+		let promiseAmpscriptToken  = mcutils.createAmpscriptToken(6399705);
+		let amptoken = await promiseAmpscriptToken;
+
+		console.log("AMPScript Test Token : " + amptoken);
 		editorApi[req.params.action](req, res);
 	/*} catch (err) {
 		next({

@@ -10,7 +10,10 @@ module.exports = {
     getLocales: async function(req, res){
 
         console.log("Editor API GetLocales");
-        console.log(JSON.stringify(res.locals.token));
+        
+        let token = sfmc.core.getToken();
+        console.log(JSON.stringify(token));
+
         let rows = await sfmc.dataextension.getRows({
             dataextensionKey: 'MLB_SYS_CountryLanguage', 
             mid: res.locals.mid,
@@ -22,7 +25,9 @@ module.exports = {
     
     getBlockList: async function(req, res){
         console.log("Editor API getBlockList");
-        console.log(JSON.stringify(res.locals.token));
+
+        let token = sfmc.core.getToken();
+        console.log(JSON.stringify(token));
 
         let rows = await sfmc.dataextension.getRows({
             dataextensionKey: 'MLB_SYS_Blocks',
@@ -34,7 +39,9 @@ module.exports = {
     
     getBlockFields: async function(req, res){
         console.log("Editor API getBlockFields");
-        console.log(JSON.stringify(res.locals.token));
+        
+        let token = sfmc.core.getToken();
+        console.log(JSON.stringify(token));
 
         let payload = JSON.parse(req.body.payload);
         let fieldsMeta = {};
