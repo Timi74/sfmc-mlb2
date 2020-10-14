@@ -36,8 +36,8 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res) {
 
 		let configRows                  = await promiseConfigRows;
 		token.ampscriptToken            = await promiseAmpscriptToken;
-		token.ampscriptUrl              = (configRows.length ? configRows[0]['HtmlPreviewEndpoint'] : null);
-		token.linkAliasParameterName    = (configRows.length ? configRows[0]['LinkAliasParameterName'] : null);
+		token.ampscriptUrl              = (configRows.rows.length ? configRows.rows[0]['HtmlPreviewEndpoint'] : null);
+		token.linkAliasParameterName    = (configRows.rows.length ? configRows.rows[0]['LinkAliasParameterName'] : null);
 
 		req.session.token = utils.encrypt(token);
 
