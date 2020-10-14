@@ -40,8 +40,6 @@ router.post('*', function (req, res, next) {
 	/*try {*/
 		let token = JSON.parse(utils.decrypt(req.session.token));
 
-		console.log(JSON.stringify(token));
-
 		sfmc.core.init({
 			token: token,
 			soapBaseUrl: token.soap_instance_url,
@@ -61,6 +59,8 @@ router.post('*', function (req, res, next) {
 
 router.post('/api/:action([\\w]+)', async function (req, res) {
 	/*try {*/
+		console.log(JSON.stringify(token));
+
 		editorApi[req.params.action](req, res);
 	/*} catch (err) {
 		next({
