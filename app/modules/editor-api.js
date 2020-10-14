@@ -193,17 +193,17 @@ module.exports = {
 		
 			payload.AmpscriptToken = res.locals.token.ampscriptToken;
             
-            data = utils.executeHttpCall({
-                uri: res.locals.token.ampscriptUrl,
-				method: 'POST',
-				body: querystring.stringify({
+            data = utils.executeHttpCall(
+                res.locals.token.ampscriptUrl,
+				'POST',
+				querystring.stringify({
 					payload: JSON.stringify(payload)
 				}),
-				headers: {
+				{
 					'Accept-Encoding': 'identity',
 					'Content-Type': 'application/x-www-form-urlencoded'
 				}
-            });
+            );
 
 		}
 		catch(err){
