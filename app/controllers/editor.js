@@ -59,11 +59,17 @@ router.post('*', function (req, res, next) {
 
 router.post('/api/:action([\\w]+)', async function (req, res) {
 	/*try {*/
+
+		console.log("API Action " + req.params.action);
+		console.log(JSON.stringify(res.locals.token));
+
 		sfmc.core.init({
 			token: res.locals.token,
 			soapBaseUrl: res.locals.token.soap_instance_url,
 			restBaseUrl: res.locals.token.rest_instance_url
 		});
+
+		console.log("Token expire: " + res.locals.token.expiresOn + " <> Now :" + new Date());
 
 		let sfmctoken = await sfmc.core.getToken();
 		console.log("SMFC node module initialized");
