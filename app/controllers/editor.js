@@ -49,6 +49,9 @@ router.post('*', function (req, res, next) {
 			restBaseUrl: token.rest_instance_url
 		});
 
+		console.log("SFMC Module initialized");
+		console.log(JSON.stringify(sfmc.config.token));
+
 		res.locals.token = token;
 		res.locals.mid = token.businessUnit;
 
@@ -63,12 +66,7 @@ router.post('*', function (req, res, next) {
 router.post('/api/:action([\\w]+)', async function (req, res) {
 	/*try {*/
 		console.log("Editor action :" +req.params.action);
-		let token = JSON.parse(utils.decrypt(req.session.token));
-		sfmc.core.init({
-			token: token,
-			soapBaseUrl: token.soap_instance_url,
-			restBaseUrl: token.rest_instance_url
-		});
+		console.log(JSON.stringify(res.locals.token));
 
 		editorApi[req.params.action](req, res);
 	/*} catch (err) {
