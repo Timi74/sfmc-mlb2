@@ -80,6 +80,8 @@ module.exports = {
     },
 
     executeHttpCall: function(uri, method, body, headers){
+
+        console.log("executeHttpCall : "+uri+ "[Method:"+ method + "]");
 		var options      = url.parse(uri);
 		options.method   = method;
 		options.headers  = headers;
