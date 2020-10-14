@@ -9,23 +9,23 @@ const db           = requireRoot('modules/db');
 module.exports = {
     getLocales: async function(req, res){
 
-        let rows = await sfmc.dataextension.getRows({
+        let data = await sfmc.dataextension.getRows({
             dataextensionKey: 'MLB_SYS_CountryLanguage', 
             mid: res.locals.mid,
             columns: ['Country', 'Language']
-        }).rows;
-        rows.forEach((e) => { e["_CustomObjectKey"] = e.Country + '-' + e.Language; });
-        res.json(rows);
+        });
+        data.rows.forEach((e) => { e["_CustomObjectKey"] = e.Country + '-' + e.Language; });
+        res.json(data.rows);
     },
     
     getBlockList: async function(req, res){
         
-        let rows = await sfmc.dataextension.getRows({
+        let data = await sfmc.dataextension.getRows({
             dataextensionKey: 'MLB_SYS_Blocks',
             mid: res.locals.mid,
             columns: ['ContentBlockKey', 'Name', 'Dataextension'],
-        }).rows;
-        res.json(rows);
+        });
+        res.json(data.rows);
     },
     
     getBlockFields: async function(req, res){
