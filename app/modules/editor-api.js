@@ -193,12 +193,15 @@ module.exports = {
 		
 			payload.AmpscriptToken = res.locals.token.ampscriptToken;
             
+            let body = querystring.stringify({
+                payload: JSON.stringify(payload)
+            });
+            console.log("HTML Preview Body: "+body);
+
             data = utils.executeHttpCall(
                 res.locals.token.ampscriptUrl,
 				'POST',
-				querystring.stringify({
-					payload: JSON.stringify(payload)
-				}),
+				body,
 				{
 					'Accept-Encoding': 'identity',
 					'Content-Type': 'application/x-www-form-urlencoded'
