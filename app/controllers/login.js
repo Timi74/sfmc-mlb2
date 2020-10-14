@@ -13,7 +13,7 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res) {
 		let packageId = req.params.package;
 		let packageData = await db.getPackageData(packageId);
 
-		let sfmc_conf = {clientId: packageData.apiClientId, clientSecret: packageData.apiClientSecret, authBaseUrl:packageData.appUrl, mid: packageData.entrepriseId, scope: "data_extensions_read data_extensions_write" };
+		let sfmc_conf = {clientId: packageData.apiClientId, clientSecret: packageData.apiClientSecret, authBaseUrl:packageData.appUrl, mid: packageData.entrepriseId, scope: "data_extensions_read data_extensions_write documents_and_images_read" };
 		sfmc.core.init(sfmc_conf);
 
 		let token = await sfmc.core.getToken();

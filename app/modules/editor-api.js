@@ -245,15 +245,15 @@ module.exports = {
                 '$pagesize': 100,
                 '$filter': 'parentId eq ' + payload.search
             });
-    
-            foldersPromise = sfmc.core.executeRest({
-                uri: 'https://www.exacttargetapis.com/asset/v1/content/categories?' + folderRequestParams,
-                method: 'GET'
+            
+            foldersPromise = sfmc.core.restExecute({
+               endpoint: 'asset/v1/content/categories?' + folderRequestParams,
+               method: 'GET' 
             });
         }
 
-        let filesPromise = sfmc.core.executeRest({
-            uri: 'https://www.exacttargetapis.com/asset/v1/content/assets/query',
+        let filesPromise = sfmc.core.restExecute({
+            endpoint: 'asset/v1/content/assets/query',
             method: 'POST',
             body: {
                 "page": {
@@ -315,8 +315,8 @@ module.exports = {
         let search = payload && payload.search ? payload.search : '%';
         let result = [];
     
-        let data = await sfmc.core.executeRest({
-            uri: 'https://www.exacttargetapis.com/asset/v1/content/assets/query',
+        let data = await sfmc.core.restExecute({
+            endpoint: 'asset/v1/content/assets/query',
             method: 'POST',
             body: {
                 "page": {
@@ -348,8 +348,8 @@ module.exports = {
     },
 
     getAssetByID: async function(id){
-        let data = await sfmc.core.executeRest({
-            uri: 'https://www.exacttargetapis.com/asset/v1/content/assets/' + id,
+        let data = await sfmc.core.restExecute({
+            uri: 'asset/v1/content/assets/' + id,
             method: 'GET'
         });
 
