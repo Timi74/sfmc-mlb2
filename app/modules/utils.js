@@ -1,5 +1,9 @@
 const config = requireRoot('config');
 const crypto = require('crypto');
+const http   = require('http');
+const https  = require('https');
+const url    = require('url');
+const zlib   = require('zlib');
 
 const encryptionAlgorithm = 'aes-256-cbc';
 
@@ -73,5 +77,55 @@ module.exports = {
 				}
 			}
 		};
-    }
+    },
+
+    executeHttpCall: function(uri, method, body, headers){
+		var options      = url.parse(uri);
+		options.method   = method;
+		options.headers  = headers;
+
+		var client = (options.protocol === 'https:' ? https : http);
+		var bodyText = (typeof body == 'object' ? JSON.stringify(body) : body);
+
+		return new Promise((resolve, reject) => {
+			var req = client.request(options, (res) => {
+				var chunks = [];
+				
+				res.on('data', (data) => { chunks.push(data); });
+				res.on('end', () => {
+					var buffer = Buffer.concat(chunks);
+
+					if(res.headers['content-encoding'] == 'gzip'){
+						zlib.gunzip(buffer, function(err, output){
+							if(!err && res.statusCode >= 200 && res.statusCode < 300){
+								resolve(output.toString());
+							}
+							else{
+								reject(err);
+							}
+						});
+					}
+					else{
+						var output = buffer.toString();;
+						if(res.statusCode >= 200 && res.statusCode < 300){
+							resolve(output);
+						}
+						else{
+							reject(output);
+						}
+					}
+				});
+			});
+
+			req.on('error', (err) => { 
+				reject(err); 
+			});
+			
+			if(bodyText){
+				req.write(bodyText);
+			}
+			
+			req.end();
+		});
+	}
 }

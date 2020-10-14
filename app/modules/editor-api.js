@@ -192,9 +192,9 @@ module.exports = {
 			let payload = JSON.parse(req.body.payload);
 		
 			payload.AmpscriptToken = res.locals.token.ampscriptToken;
-		
-			data = await sfmc.core.executeRest({
-				uri: res.locals.token.ampscriptUrl,
+            
+            data = utils.executeHttpCall({
+                uri: res.locals.token.ampscriptUrl,
 				method: 'POST',
 				body: querystring.stringify({
 					payload: JSON.stringify(payload)
@@ -203,7 +203,8 @@ module.exports = {
 					'Accept-Encoding': 'identity',
 					'Content-Type': 'application/x-www-form-urlencoded'
 				}
-			});
+            });
+
 		}
 		catch(err){
 			data = {
