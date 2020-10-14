@@ -13,19 +13,18 @@ module.exports = {
             dataextensionKey: 'MLB_SYS_CountryLanguage', 
             mid: res.locals.mid,
             columns: ['Country', 'Language']
-        });
-        console.log(JSON.stringify(rows));
+        }).rows;
         rows.forEach((e) => { e["_CustomObjectKey"] = e.Country + '-' + e.Language; });
-        res.json(rows);
+        res.json(data.rows);
     },
     
     getBlockList: async function(req, res){
         
-        let rows = await sfmc.dataextension.getRows({
+        let data = await sfmc.dataextension.getRows({
             dataextensionKey: 'MLB_SYS_Blocks',
             mid: res.locals.mid,
             columns: ['ContentBlockKey', 'Name', 'Dataextension'],
-        });
+        }).rows;
         res.json(rows);
     },
     
@@ -50,7 +49,7 @@ module.exports = {
                 SimpleOperator:    'equals',
                 Value:             payload.ContentBlockKey
             }
-        });
+        }).rows;
         
         let dataextensionName = await mcutils.getDataextensionByBlock(res.locals.mid, payload.ContentBlockKey);
     
@@ -60,6 +59,7 @@ module.exports = {
         });
     
         let fields = await fieldsPromise;
+
         let columns = await columnsPromise;
     
         fields.forEach((e) => {
@@ -98,12 +98,12 @@ module.exports = {
     
         let dataextensionName = await mcutils.getDataextensionByBlock(res.locals.mid, payload.ContentBlockKey);
     
-        let fieldsRows = await sfmc.dataextension.getRows({
+        let dataFieldsRows = await sfmc.dataextension.getRows({
             dataextensionKey: dataextensionName, 
             mid: res.locals.mid,
             filter: utils.getContentFilter(payload.ContentKey, payload.Country, payload.Language)
-        });
-    
+        }).rows;
+        
         payload.Fields = {};
     
         if(fieldsRows && fieldsRows.length > 0){
@@ -389,7 +389,7 @@ module.exports = {
                             SimpleOperator:    'equals',
                             Value:             meta.contentKey				
                         }
-                    });
+                    }).rows;
 
                     for(let i = 0; i < rows.length; i++){
                         let row = rows[i];

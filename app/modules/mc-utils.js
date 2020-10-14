@@ -14,11 +14,11 @@ module.exports = {
             }
         });
     
-        if(!dataextensionRows || dataextensionRows.length != 1){
+        if(!dataextensionRows || dataextensionRows.rows.length != 1){
             throw new Error('Unable to find a Dataextension name for this block');
         }
     
-        return dataextensionRows[0].Dataextension;
+        return dataextensionRows.rows.[0].Dataextension;
     },
 
     createAmpscriptToken: async function(mid){
