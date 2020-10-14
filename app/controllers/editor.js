@@ -40,6 +40,8 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res, next) 
 router.post('*', function (req, res, next) {
 	/*try {*/
 		let token = JSON.parse(utils.decrypt(req.session.token));
+		token.expiresOn = new Date(token.expiresOn);
+
 		sfmc.core.init({
 			token: token,
 			soapBaseUrl: token.soap_instance_url,
