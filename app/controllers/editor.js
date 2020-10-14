@@ -38,7 +38,10 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res, next) 
 
 router.post('*', function (req, res, next) {
 	/*try {*/
+		console.log("Enter POST Editor");
 		let token = JSON.parse(utils.decrypt(req.session.token));
+
+		console.log(JSON.stringify(token));
 
 		sfmc.core.init({
 			token: token,
@@ -59,8 +62,7 @@ router.post('*', function (req, res, next) {
 
 router.post('/api/:action([\\w]+)', async function (req, res) {
 	/*try {*/
-		console.log(JSON.stringify(token));
-
+		console.log("Editor action :" +req.params.action);
 		editorApi[req.params.action](req, res);
 	/*} catch (err) {
 		next({
