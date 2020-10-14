@@ -69,7 +69,10 @@ router.post('/api/:action([\\w]+)', async function (req, res) {
 			restBaseUrl: res.locals.token.rest_instance_url
 		});
 
-		console.log("Token expire: " + res.locals.token.expiresOn + " <> Now :" + new Date());
+		let now = new Date();
+		if (res.locals.token && res.locals.token.expiresOn > now) {
+			console.log("Token valide: " + res.locals.token.expiresOn + "  vs Now :" + now);
+		}
 
 		let sfmctoken = await sfmc.core.getToken();
 		console.log("SMFC node module initialized");
