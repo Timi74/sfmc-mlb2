@@ -63,6 +63,13 @@ router.post('*', function (req, res, next) {
 router.post('/api/:action([\\w]+)', async function (req, res) {
 	/*try {*/
 		console.log("Editor action :" +req.params.action);
+		let token = JSON.parse(utils.decrypt(req.session.token));
+		sfmc.core.init({
+			token: token,
+			soapBaseUrl: token.soap_instance_url,
+			restBaseUrl: token.rest_instance_url
+		});
+
 		editorApi[req.params.action](req, res);
 	/*} catch (err) {
 		next({
