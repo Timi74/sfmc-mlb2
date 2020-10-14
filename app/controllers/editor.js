@@ -46,7 +46,7 @@ router.post('*', function (req, res, next) {
 			restBaseUrl: token.rest_instance_url
 		});
 
-		let sfmctoken = sfmc.core.getToken();
+		let sfmctoken = await sfmc.core.getToken();
 		console.log("SMFC node module initialized");
 		console.log(JSON.stringify(sfmctoken));
 
