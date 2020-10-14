@@ -46,6 +46,10 @@ router.post('*', function (req, res, next) {
 			restBaseUrl: token.rest_instance_url
 		});
 
+		let sfmctoken = sfmc.core.getToken();
+		console.log("SMFC node module initialized");
+		console.log(JSON.stringify(sfmctoken));
+
 		res.locals.token = token;
 		res.locals.mid = token.businessUnit;
 
@@ -59,11 +63,6 @@ router.post('*', function (req, res, next) {
 
 router.post('/api/:action([\\w]+)', async function (req, res) {
 	/*try {*/
-
-		let promiseAmpscriptToken  = mcutils.createAmpscriptToken(6399705);
-		let amptoken = await promiseAmpscriptToken;
-
-		console.log("AMPScript Test Token : " + amptoken);
 		editorApi[req.params.action](req, res);
 	/*} catch (err) {
 		next({
