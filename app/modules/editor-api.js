@@ -9,26 +9,18 @@ const db           = requireRoot('modules/db');
 module.exports = {
     getLocales: async function(req, res){
 
-        console.log("Editor API GetLocales");
-        
-        let token = await sfmc.core.getToken();
-        console.log(JSON.stringify(token));
-
         let rows = await sfmc.dataextension.getRows({
             dataextensionKey: 'MLB_SYS_CountryLanguage', 
             mid: res.locals.mid,
             columns: ['Country', 'Language']
         });
+        console.log(JSON.stringify(rows));
         rows.forEach((e) => { e["_CustomObjectKey"] = e.Country + '-' + e.Language; });
         res.json(rows);
     },
     
     getBlockList: async function(req, res){
-        console.log("Editor API getBlockList");
-
-        let token = await sfmc.core.getToken();
-        console.log(JSON.stringify(token));
-
+        
         let rows = await sfmc.dataextension.getRows({
             dataextensionKey: 'MLB_SYS_Blocks',
             mid: res.locals.mid,
@@ -38,11 +30,7 @@ module.exports = {
     },
     
     getBlockFields: async function(req, res){
-        console.log("Editor API getBlockFields");
-
-        let token = await sfmc.core.getToken();
-        console.log(JSON.stringify(token));
-
+        
         let payload = JSON.parse(req.body.payload);
         let fieldsMeta = {};
         let result = [];
