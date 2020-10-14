@@ -50,7 +50,6 @@ router.post('*', function (req, res, next) {
 		});
 
 		console.log("SFMC Module initialized");
-		console.log(JSON.stringify(sfmc.config.token));
 
 		res.locals.token = token;
 		res.locals.mid = token.businessUnit;
