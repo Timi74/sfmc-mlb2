@@ -24,7 +24,7 @@ router.get('/:package([-\\w]+)/:mid([-\\w]+)/', async function (req, res) {
 
 		let promiseAmpscriptToken  = mcutils.createAmpscriptToken(token.businessUnit);
 		let promiseConfigRows      = sfmc.dataextension.getRows({
-            dataextensionKey: 'MLB_SYS_Config', 
+            dataextensionKey: 'MLB_SYS_BUConfig', 
 			columns: ['HtmlPreviewEndpoint', 'LinkAliasParameterName'],
 			mid: token.enterpriseId,
             filter: {
